@@ -108,7 +108,7 @@ export interface ImageEditorProps {
     onStrokeEnd?: (path: Path) => void;
     onSketchSaved?: (result: boolean, path: string) => void;
     onPathsChange?: (pathsCount: number) => void;
-    onShapeSelectionChanged?: (isShapeSelected: boolean) => void;
+    onShapeSelectionChanged?: (isShapeSelected: boolean, shapeText: string) => void;
 }
 
 export class ImageEditor extends React.Component<ImageEditorProps & ViewProperties> {
@@ -206,7 +206,7 @@ export interface RNImageEditorProps {
         cropToImageSize?: boolean;
     };
     onSketchSaved?: (result: boolean, path: string) => void;
-    onShapeSelectionChanged?: (isShapeSelected: boolean) => void;
+    onShapeSelectionChanged?: (isShapeSelected: boolean, shapeText: string) => void;
 
     text?: CanvasText[];
     /**
