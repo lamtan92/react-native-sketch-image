@@ -1,5 +1,5 @@
 {
-    "name": "@baldrco/react-native-sketch-canvas",
+    "name": "baldr-react-native-sketch-canvas",
     "repository": {
         "type": "git",
         "url": "https://github.com/wwimmo/react-native-sketch-canvas"
