@@ -842,10 +842,16 @@
 
 - (void)handleRotate:(UIRotationGestureRecognizer *)sender {
     UIGestureRecognizerState state = [sender state];
+    
+    // First we acquire the entity where the user is moving
+    CGPoint tapLocation = [sender locationInView:sender.view];
+    MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    
+    // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        if (self.selectedEntity) {
-            [self.selectedEntity rotateEntityBy:sender.rotation];
-            [self setNeedsDisplayInRect:self.selectedEntity.bounds];
+        if (nextEntity) {
+            [nextEntity rotateEntityBy:sender.rotation];
+            [self setNeedsDisplayInRect:nextEntity.bounds];
         }
         [sender setRotation:0.0];
     }
@@ -853,21 +859,33 @@
 
 - (void)handleMove:(UIPanGestureRecognizer *)sender {
     UIGestureRecognizerState state = [sender state];
-    if (self.selectedEntity) {
+    
+    // First we acquire the entity where the user is moving
+    CGPoint tapLocation = [sender locationInView:sender.view];
+    MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    
+    // Then if we have an entity, we try to move it
+    if (nextEntity) {
         if (state != UIGestureRecognizerStateCancelled) {
-            [self.selectedEntity moveEntityTo:[sender translationInView:self.selectedEntity]];
+            [nextEntity moveEntityTo:[sender translationInView:nextEntity]];
             [sender setTranslation:CGPointZero inView:sender.view];
-            [self setNeedsDisplayInRect:self.selectedEntity.bounds];
+            [self setNeedsDisplayInRect:nextEntity.bounds];
         }
     }
 }
 
 - (void)handleScale:(UIPinchGestureRecognizer *)sender {
     UIGestureRecognizerState state = [sender state];
+    
+    // First we acquire the entity where the user is moving
+    CGPoint tapLocation = [sender locationInView:sender.view];
+    MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    
+    // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        if (self.selectedEntity) {
-            [self.selectedEntity scaleEntityBy:sender.scale];
-            [self setNeedsDisplayInRect:self.selectedEntity.bounds];
+        if (nextEntity) {
+            [nextEntity scaleEntityBy:sender.scale];
+            [self setNeedsDisplayInRect:nextEntity.bounds];
         }
         [sender setScale:1.0];
     }
