@@ -765,6 +765,12 @@
 
 - (void)updateSelectionOnTapWithLocationPoint:(CGPoint)tapLocation {
     MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+            // Return if the gestures are disabled
+            if(!self.gesturesEnabled){
+                return;
+        }
+    }
     [self onShapeSelectionChanged:nextEntity];
     [self selectEntity:nextEntity];
 }
@@ -848,12 +854,7 @@
     }
 }
 
-- (void)handleRotate:(UIRotationGestureRecognizer *)sender {
-    // Return if the gestures are disabled
-    if(!self.gesturesEnabled){
-        return;
-    }
-    
+- (void)handleRotate:(UIRotationGestureRecognizer *)sender {    
     // Acquire the gesture state
     UIGestureRecognizerState state = [sender state];
     
@@ -864,6 +865,12 @@
     // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
         if (nextEntity) {
+            if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+                // Return if the gestures are disabled
+                if(!self.gesturesEnabled){
+                    return;
+                }
+            }
             [nextEntity rotateEntityBy:sender.rotation];
             [self setNeedsDisplayInRect:nextEntity.bounds];
         }
@@ -872,11 +879,6 @@
 }
 
 - (void)handleMove:(UIPanGestureRecognizer *)sender {
-    // Return if the gestures are disabled
-    if(!self.gesturesEnabled){
-        return;
-    }
-    
     // Acquire the gesture state
     UIGestureRecognizerState state = [sender state];
     
@@ -886,6 +888,12 @@
     
     // Then if we have an entity, we try to move it
     if (nextEntity) {
+        if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+            // Return if the gestures are disabled
+            if(!self.gesturesEnabled){
+                return;
+            }
+        }
         if (state != UIGestureRecognizerStateCancelled) {
             [nextEntity moveEntityTo:[sender translationInView:nextEntity]];
             [sender setTranslation:CGPointZero inView:sender.view];
@@ -895,11 +903,6 @@
 }
 
 - (void)handleScale:(UIPinchGestureRecognizer *)sender {
-    // Return if the gestures are disabled
-    if(!self.gesturesEnabled){
-        return;
-    }
-    
     // Acquire the gesture state
     UIGestureRecognizerState state = [sender state];
     
@@ -910,6 +913,12 @@
     // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
         if (nextEntity) {
+            if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+                // Return if the gestures are disabled
+                if(!self.gesturesEnabled){
+                    return;
+                }
+            }
             [nextEntity scaleEntityBy:sender.scale];
             [self setNeedsDisplayInRect:nextEntity.bounds];
         }
@@ -937,16 +946,14 @@
     }
     if (_onChange) {
         if (isShapeSelected) {
-            _onChange(@{ @"isShapeSelected": @YES, @"shapeText": @"" });
-        } else {
-            //TODO: Add delay!
-            
             // If it's a class entity, we add back the shapeText
             if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
-                _onChange(@{ @"isShapeSelected": @NO, @"shapeText": ((TextEntity *)nextEntity).text});
+                _onChange(@{ @"isShapeSelected": @YES, @"shapeText": ((TextEntity *)nextEntity).text });
             } else {
-                _onChange(@{ @"isShapeSelected": @NO, @"shapeText": @"" });
+                _onChange(@{ @"isShapeSelected": @YES, @"shapeText": @"" });
             }
+        } else {
+            _onChange(@{ @"isShapeSelected": @NO, @"shapeText": @"" });
         }
     }
 }
