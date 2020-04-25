@@ -945,7 +945,7 @@
             if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
                 _onChange(@{ @"isShapeSelected": @NO, @"shapeText": ((TextEntity *)nextEntity).text});
             } else {
-                _onChange(@{ @"isShapeSelected": @YES, @"shapeText": @"" });
+                _onChange(@{ @"isShapeSelected": @NO, @"shapeText": @"" });
             }
         }
     }
