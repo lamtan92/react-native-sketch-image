@@ -222,7 +222,7 @@
     return NO;
 }
 
-- (void)setGesturesEnabled:(BOOL)gesturesEnabled {
+- (void)setGesturesEnabled:(BOOL)enabled {
     self.gesturesEnabled = gesturesEnabled;
 }
 
