@@ -67,6 +67,7 @@ public class ImageEditor extends View {
     private RotateGestureDetector mRotateGestureDetector;
     private MoveGestureDetector mMoveGestureDetector;
     private GestureDetectorCompat mGestureDetectorCompat;
+    private boolean mGesturesEnabled;
 
     // Shapes/Entities
     private final ArrayList<MotionEntity> mEntities = new ArrayList<MotionEntity>();
@@ -105,6 +106,7 @@ public class ImageEditor extends View {
         this.mRotateGestureDetector = new RotateGestureDetector(context, new RotateListener());
         this.mMoveGestureDetector = new MoveGestureDetector(context, new MoveListener());
         this.mGestureDetectorCompat = new GestureDetectorCompat(context, new TapsListener());
+        this.mGesturesEnabled = true;
 
         // Is initialized at bottom of class w/ other GestureDetectors
         setOnTouchListener(mOnTouchListener);
@@ -522,6 +524,10 @@ public class ImageEditor extends View {
         } else {
             throw new IllegalArgumentException("unsupported drawable type");
         }
+    }
+
+    public void setGesturesEnabled(boolean enabled){
+        mGesturesEnabled = enabled;
     }
 
     public void setCanvasText(ReadableArray aText) {
@@ -949,6 +955,11 @@ public class ImageEditor extends View {
     private class TapsListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            // If gestures are disabled
+            if(!mGesturesEnabled) {
+                return false;
+            }
+
             if (mSelectedEntity != null) {
                 return true;
             }
@@ -973,6 +984,11 @@ public class ImageEditor extends View {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
+            // If gestures are disabled
+            if(!mGesturesEnabled) {
+                return;
+            }
+
             if (mSelectedEntity != null) {
                 float scaleFactorDiff = detector.getScaleFactor();
                 mSelectedEntity.getLayer().postScale(scaleFactorDiff - 1.0F);
@@ -986,6 +1002,11 @@ public class ImageEditor extends View {
     private class RotateListener extends RotateGestureDetector.SimpleOnRotateGestureListener {
         @Override
         public boolean onRotate(RotateGestureDetector detector) {
+            // If gestures are disabled
+            if(!mGesturesEnabled) {
+                return;
+            }
+
             if (mSelectedEntity != null) {
                 mSelectedEntity.getLayer().postRotate(-detector.getRotationDegreesDelta());
                 invalidateCanvas(true);
@@ -998,6 +1019,11 @@ public class ImageEditor extends View {
     private class MoveListener extends MoveGestureDetector.SimpleOnMoveGestureListener {
         @Override
         public boolean onMove(MoveGestureDetector detector) {
+            // If gestures are disabled
+            if(!mGesturesEnabled) {
+                return;
+            }
+
             if (mSelectedEntity != null) {
                 handleTranslate(detector.getFocusDelta());
                 return true;

@@ -50,6 +50,7 @@ public class ImageEditorManager extends SimpleViewManager<ImageEditor> {
     private static final String PROPS_LOCAL_SOURCE_IMAGE = "localSourceImage";
     private static final String PROPS_TEXT = "text";
     private static final String PROPS_SHAPE_CONFIGURATION = "shapeConfiguration";
+    private static final boolean PROPS_GESTURES_ENABLED = "gesturesEnabled";
 
     @Override
     public String getName() {
@@ -83,6 +84,11 @@ public class ImageEditorManager extends SimpleViewManager<ImageEditor> {
     @ReactProp(name = PROPS_TEXT)
     public void setText(ImageEditor viewContainer, ReadableArray text) {
         viewContainer.setCanvasText(text);
+    }
+
+    @ReactProp(name = PROPS_GESTURES_ENABLED)
+    public void setGesturesEnabled(ImageEditor viewContainer, boolean enabled){
+        viewContainer.setGesturesEnabled(enabled);
     }
 
     @Override
