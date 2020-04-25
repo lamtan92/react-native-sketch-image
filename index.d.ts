@@ -228,6 +228,8 @@ export interface RNImageEditorProps {
      * }
      */
     shapeConfiguration?: ShapeConfiguration;
+
+    gesturesEnabled?: boolean;
 }
 
 export default class RNImageEditor extends React.Component<RNImageEditorProps & ViewProperties> {

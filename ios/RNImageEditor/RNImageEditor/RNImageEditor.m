@@ -52,6 +52,8 @@
         self.entityStrokeWidth = 5.0;
         self.entityStrokeColor = [UIColor blackColor];
         
+        self.gesturesEnabled = YES;
+        
         self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
         self.tapGesture.delegate = self;
         self.tapGesture.numberOfTapsRequired = 1;
@@ -87,6 +89,10 @@
 // Make multiple GestureRecognizers work
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return TRUE;
+}
+
+- (void)setGesturesEnabled:(BOOL)gesturesEnabled {
+    self.gesturesEnabled = gesturesEnabled;
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -834,6 +840,12 @@
 
 #pragma mark - UIGestureRecognizers
 - (void)handleTap:(UITapGestureRecognizer *)sender {
+    // Return if the gestures are disabled
+    if(!self.gesturesEnabled){
+        return;
+    }
+    
+    // Does the gesture ended?
     if (sender.state == UIGestureRecognizerStateEnded) {
         CGPoint tapLocation = [sender locationInView:sender.view];
         [self updateSelectionOnTapWithLocationPoint:tapLocation];
@@ -841,6 +853,12 @@
 }
 
 - (void)handleRotate:(UIRotationGestureRecognizer *)sender {
+    // Return if the gestures are disabled
+    if(!self.gesturesEnabled){
+        return;
+    }
+    
+    // Acquire the gesture state
     UIGestureRecognizerState state = [sender state];
     
     // First we acquire the entity where the user is moving
@@ -858,6 +876,12 @@
 }
 
 - (void)handleMove:(UIPanGestureRecognizer *)sender {
+    // Return if the gestures are disabled
+    if(!self.gesturesEnabled){
+        return;
+    }
+    
+    // Acquire the gesture state
     UIGestureRecognizerState state = [sender state];
     
     // First we acquire the entity where the user is moving
@@ -875,6 +899,12 @@
 }
 
 - (void)handleScale:(UIPinchGestureRecognizer *)sender {
+    // Return if the gestures are disabled
+    if(!self.gesturesEnabled){
+        return;
+    }
+    
+    // Acquire the gesture state
     UIGestureRecognizerState state = [sender state];
     
     // First we acquire the entity where the user is moving

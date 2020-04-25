@@ -67,7 +67,9 @@ export default class RNImageEditor extends React.Component {
         }),
 
         permissionDialogTitle: PropTypes.string,
-        permissionDialogMessage: PropTypes.string
+        permissionDialogMessage: PropTypes.string,
+
+        gesturesEnabled: PropTypes.bool
     };
 
     static defaultProps = {
