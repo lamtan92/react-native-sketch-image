@@ -401,7 +401,7 @@ class ImageEditor extends React.Component {
                     shapeColor: processColor(this.props.strokeColor),
                     shapeStrokeWidth: this.props.strokeWidth
                 }}
-                text={this.state.text},
+                text={this.state.text}
                 gesturesEnabled={this.props.gesturesEnabled}
             />
         );
