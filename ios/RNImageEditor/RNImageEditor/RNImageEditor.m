@@ -911,10 +911,16 @@
     }
     if (_onChange) {
         if (isShapeSelected) {
-            _onChange(@{ @"isShapeSelected": @YES });
+            _onChange(@{ @"isShapeSelected": @YES, @"shapeText": @"" });
         } else {
-            // Add delay!
-            _onChange(@{ @"isShapeSelected": @NO });
+            //TODO: Add delay!
+            
+            // If it's a class entity, we add back the shapeText
+            if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+                _onChange(@{ @"isShapeSelected": @NO, @"shapeText": ((TextEntity *)nextEntity).text});
+            } else {
+                _onChange(@{ @"isShapeSelected": @YES, @"shapeText": @"" });
+            }
         }
     }
 }
