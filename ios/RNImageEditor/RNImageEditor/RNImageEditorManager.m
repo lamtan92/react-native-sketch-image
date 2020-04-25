@@ -61,10 +61,7 @@ RCT_CUSTOM_VIEW_PROPERTY(text, NSArray, RNImageEditor)
 RCT_CUSTOM_VIEW_PROPERTY(gesturesEnabled, BOOL, RNImageEditor)
 {
     RNImageEditor *currentView = !view ? defaultView : view;
-    BOOL enabled = [RCTConvert BOOL:json];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [currentView setGesturesEnabled:enabled];
-    });
+    currentView.gesturesEnabled = [RCTConvert BOOL:json];
 }
 
 #pragma mark - Lifecycle

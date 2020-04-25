@@ -222,10 +222,6 @@
     return NO;
 }
 
-- (void)setGesturesEnabled:(BOOL)enabled {
-    self.gesturesEnabled = enabled;
-}
-
 - (void)setCanvasText:(NSArray *)aText {
     NSMutableArray *arrTextOnSketch = [NSMutableArray new];
     NSMutableArray *arrSketchOnText = [NSMutableArray new];
