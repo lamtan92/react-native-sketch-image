@@ -81,6 +81,8 @@ export interface ImageEditorProps {
     text?: CanvasText[];
     localSourceImage?: LocalSourceImage;
     touchEnabled?: boolean;
+    
+    gesturesEnabled?: boolean;
 
     /**
      * {
