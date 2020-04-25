@@ -91,10 +91,6 @@
     return TRUE;
 }
 
-- (void)setGesturesEnabled:(BOOL)gesturesEnabled {
-    self.gesturesEnabled = gesturesEnabled;
-}
-
 - (void)drawRect:(CGRect)rect {
     CGContextRef context = UIGraphicsGetCurrentContext();
 
@@ -224,6 +220,10 @@
         }
     }
     return NO;
+}
+
+- (void)setGesturesEnabled:(BOOL)gesturesEnabled {
+    self.gesturesEnabled = gesturesEnabled;
 }
 
 - (void)setCanvasText:(NSArray *)aText {
