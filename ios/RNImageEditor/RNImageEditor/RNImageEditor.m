@@ -223,7 +223,7 @@
 }
 
 - (void)setGesturesEnabled:(BOOL)enabled {
-    self.gesturesEnabled = gesturesEnabled;
+    self.gesturesEnabled = enabled;
 }
 
 - (void)setCanvasText:(NSArray *)aText {
