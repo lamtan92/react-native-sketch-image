@@ -66,7 +66,9 @@ class ImageEditor extends React.Component {
         }),
 
         permissionDialogTitle: PropTypes.string,
-        permissionDialogMessage: PropTypes.string
+        permissionDialogMessage: PropTypes.string,
+
+        gesturesEnabled: PropTypes.bool
     };
 
     static defaultProps = {
@@ -96,6 +98,8 @@ class ImageEditor extends React.Component {
 
         permissionDialogTitle: "",
         permissionDialogMessage: "",
+
+        gesturesEnabled: true,
 
         defaultPaths: [],
     };
@@ -397,7 +401,8 @@ class ImageEditor extends React.Component {
                     shapeColor: processColor(this.props.strokeColor),
                     shapeStrokeWidth: this.props.strokeWidth
                 }}
-                text={this.state.text}
+                text={this.state.text},
+                gesturesEnabled={this.props.gesturesEnabled}
             />
         );
     }
