@@ -296,7 +296,7 @@ class ImageEditor extends React.Component {
             onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
 
             onPanResponderGrant: (evt, gestureState) => {
-                if (!this.props.touchEnabled) return;
+				if (!this.props.touchEnabled || evt.nativeEvent.touches.length > 1) return;
                 const e = evt.nativeEvent;
                 this._offset = { x: e.pageX - e.locationX, y: e.pageY - e.locationY };
                 this._path = {
