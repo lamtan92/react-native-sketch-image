@@ -77,11 +77,11 @@ export interface ImageEditorProps {
     strokeColor?: string;
     strokeWidth?: number;
     user?: string;
-
+	scale?: number;
     text?: CanvasText[];
     localSourceImage?: LocalSourceImage;
     touchEnabled?: boolean;
-    
+
     gesturesEnabled?: boolean;
 
     /**
