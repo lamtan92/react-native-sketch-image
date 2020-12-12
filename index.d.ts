@@ -81,7 +81,7 @@ export interface ImageEditorProps {
     text?: CanvasText[];
     localSourceImage?: LocalSourceImage;
     touchEnabled?: boolean;
-
+	defaultPaths?: Path[];
     gesturesEnabled?: boolean;
 
     /**
@@ -174,7 +174,7 @@ export interface RNImageEditorProps {
     onClearPressed?: () => void;
     onPathsChange?: (pathsCount: number) => void;
     user?: string;
-
+	defaultPaths?: Path[];
     closeComponent?: JSX.Element;
     eraseComponent?: JSX.Element;
     deleteSelectedShapeComponent?: JSX.Element;
