@@ -110,9 +110,10 @@ class ImageEditor extends React.Component {
     };
 
     constructor(props) {
-        super(props);
+		super(props);
+		this._defaultPaths = this.props.defaultPaths;
         this._pathsToProcess = this.props.defaultPaths || [];
-        this._paths = this.props.defaultPaths || [];
+        this._paths = [];
         this._path = null;
         this._handle = null;
         this._screenScale = Platform.OS === "ios" ? 1 : PixelRatio.get();
