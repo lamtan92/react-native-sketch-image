@@ -24,6 +24,7 @@ const ImageEditorManager = NativeModules.RNImageEditorManager || {};
 
 class ImageEditor extends React.Component {
     static propTypes = {
+		onLayout: PropTypes.func,
         style: ViewPropTypes.style,
         strokeColor: PropTypes.string,
         strokeWidth: PropTypes.number,
@@ -80,7 +81,8 @@ class ImageEditor extends React.Component {
         onStrokeChanged: () => {},
         onStrokeEnd: () => {},
         onSketchSaved: () => {},
-        onShapeSelectionChanged: () => {},
+		onShapeSelectionChanged: () => {},
+		onLayout: null,
         shapeConfiguration: {
             shapeBorderColor: "transparent",
             shapeBorderStyle: "Dashed",
@@ -124,7 +126,8 @@ class ImageEditor extends React.Component {
         this.state = {
             text: ImageEditor.processText(props.text ? props.text.map((t) => Object.assign({}, t)) : null),
             hasPanResponder: false
-        };
+		};
+
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -152,7 +155,8 @@ class ImageEditor extends React.Component {
 
     clear() {
         this._paths = [];
-        this._path = null;
+		this._path = null;
+		this._pathsToProcess = []
         UIManager.dispatchViewManagerCommand(
             this._handle,
             UIManager.getViewManagerConfig(RNImageEditor).Commands.clear,
@@ -378,6 +382,7 @@ class ImageEditor extends React.Component {
                     this._size = { width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height };
                     this._initialized = true;
                     this._pathsToProcess.length > 0 && this._pathsToProcess.forEach((p) => this.addPath(p));
+					if(this.props.onLayout) this.props.onLayout(e)
                 }}
                 {...(this.state.hasPanResponder ? this.panResponder.panHandlers : undefined)}
                 {...this.panResponder?.panHandlers}
