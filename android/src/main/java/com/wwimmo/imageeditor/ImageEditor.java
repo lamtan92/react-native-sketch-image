@@ -986,7 +986,7 @@ public class ImageEditor extends View {
         public boolean onScale(ScaleGestureDetector detector) {
             // If gestures are disabled
             if(!mGesturesEnabled) {
-                return;
+                return false;
             }
 
             if (mSelectedEntity != null) {
@@ -1004,7 +1004,7 @@ public class ImageEditor extends View {
         public boolean onRotate(RotateGestureDetector detector) {
             // If gestures are disabled
             if(!mGesturesEnabled) {
-                return;
+                return false;
             }
 
             if (mSelectedEntity != null) {
@@ -1021,7 +1021,7 @@ public class ImageEditor extends View {
         public boolean onMove(MoveGestureDetector detector) {
             // If gestures are disabled
             if(!mGesturesEnabled) {
-                return;
+                return false;
             }
 
             if (mSelectedEntity != null) {
