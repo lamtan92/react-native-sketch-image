@@ -4,7 +4,7 @@
         "type": "git",
         "url": "https://github.com/redisean/react-native-sketch-image"
     },
-    "version": "0.8.16.z-3",
+    "version": "1.0.0",
     "description": "react-native-sketch-image allows you to draw / sketch on both iOS and Android devices and sync the drawing data between users. Of course you can save as image.",
     "author": "Sean Gilbert",
     "main": "index.js",
