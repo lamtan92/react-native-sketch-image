@@ -19,6 +19,7 @@
 @property (nonatomic) UIPanGestureRecognizer *moveGesture;
 @property (nonatomic) UIPinchGestureRecognizer *scaleGesture;
 @property (nonatomic) BOOL gesturesEnabled;
+@property (nonatomic) NSString* user;
 
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher;
 
@@ -39,4 +40,7 @@
 - (void)increaseTextEntityFontSize;
 - (void)decreaseTextEntityFontSize;
 - (void)setTextEntityText:(NSString *)newText;
+- (void)deleteShape:(int) shapeId;
+- (void)addShapeEntity:(NSString *)entityType textShapeFontType: (NSString *)textShapeFontType textShapeFontSize: (NSNumber *)textShapeFontSize textShapeText: (NSString *)textShapeText imageShapeAsset: (NSString *)imageShapeAsset userId:(NSString *)userId shapeId: (NSInteger)shapeId x: (float)x y: (float)y scale: (float)scale rotate: (float)rotate color:(UIColor*) color;
+
 @end

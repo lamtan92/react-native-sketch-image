@@ -7,6 +7,7 @@
 //
 
 #import "MotionEntity.h"
+#include <stdlib.h>
 
 @implementation MotionEntity
 {
@@ -45,6 +46,51 @@
         self.entityStrokeColor = entityStrokeColor;
         
         self.backgroundColor = [UIColor clearColor];
+
+        self.id = arc4random_uniform(1000000);
+        self.userId = @"";
+    }
+    return self;
+}
+
+- (instancetype)initAndSetupWithParent: (NSInteger)parentWidth
+                          parentHeight: (NSInteger)parentHeight
+                         parentCenterX: (CGFloat)parentCenterX
+                         parentCenterY: (CGFloat)parentCenterY
+                     parentScreenScale: (CGFloat)parentScreenScale
+                                 width: (NSInteger)width
+                                height: (NSInteger)height
+                        bordersPadding: (CGFloat)bordersPadding
+                           borderStyle: (enum BorderStyle)borderStyle
+                     borderStrokeWidth: (CGFloat)borderStrokeWidth
+                     borderStrokeColor: (UIColor *)borderStrokeColor
+                     entityStrokeWidth: (CGFloat)entityStrokeWidth
+                     entityStrokeColor: (UIColor *)entityStrokeColor
+                                    id: (NSInteger)id 
+                                userId: (NSString *)userId {
+    
+    self = [super initWithFrame:CGRectMake(parentCenterX, parentCenterY, width, height)];
+    
+    if (self) {
+        self.parentWidth = parentWidth;
+        self.parentHeight = parentHeight;
+        self.isSelected = false;
+        self.centerPoint = CGPointMake(parentCenterX, parentCenterY);
+        self.scale = 1.0;
+        self.MIN_SCALE = 0.15f;
+        self.MAX_SCALE = 4.5f;
+        self.parentScreenScale = parentScreenScale;
+        self.borderStyle = borderStyle;
+        self.borderStrokeWidth = borderStrokeWidth;
+        self.bordersPadding = bordersPadding;
+        self.borderStrokeColor = borderStrokeColor;
+        self.entityStrokeWidth = entityStrokeWidth;
+        self.entityStrokeColor = entityStrokeColor;
+        
+        self.backgroundColor = [UIColor clearColor];
+
+        self.id = id;
+        self.userId = userId;
     }
     return self;
 }
@@ -79,6 +125,25 @@
     }
 }
 
+- (CGPoint)getCenterPoint {
+    return CGPointMake(self.frame.origin.x + self.frame.size.width * 0.5, self.frame.origin.y + self.frame.size.height * 0.5);
+}
+
+- (CGSize)getEntitySize {
+    return self.frame.size;
+}
+
+- (NSInteger)getId {
+    return self.id;
+}
+
+- (void)updateEntity:(CGPoint)location rotationInRadians: (CGFloat)rotationInRadians newScale:(CGFloat)newScale  {
+   self.center = location;
+   CGAffineTransform t = CGAffineTransformMakeRotation(rotationInRadians);
+
+   self.transform = CGAffineTransformScale(t, newScale, newScale);
+}
+
 - (void)updateStrokeSettings: (enum BorderStyle)borderStyle
            borderStrokeWidth: (CGFloat)borderStrokeWidth
            borderStrokeColor: (UIColor *)borderStrokeColor
@@ -90,7 +155,7 @@
         self.borderStrokeWidth = borderStrokeWidth;
         self.borderStrokeColor = borderStrokeColor;
         self.entityStrokeWidth = entityStrokeWidth;
-        self.entityStrokeColor = entityStrokeColor;
+        // self.entityStrokeColor = entityStrokeColor;
     }
 }
 

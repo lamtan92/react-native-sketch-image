@@ -20,11 +20,13 @@ public class TextEntity extends MotionEntity {
     @Nullable
     private Bitmap bitmap;
 
-    public TextEntity(@NonNull TextLayer textLayer,
+    public TextEntity(
+                    String userId,
+                    int id,
+                    @NonNull TextLayer textLayer,
                       @IntRange(from = 1) int canvasWidth,
                       @IntRange(from = 1) int canvasHeight) {
-        super(textLayer, canvasWidth, canvasHeight);
-
+        super(userId, id, textLayer, canvasWidth, canvasHeight);
         this.textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 
         updateEntity(false);

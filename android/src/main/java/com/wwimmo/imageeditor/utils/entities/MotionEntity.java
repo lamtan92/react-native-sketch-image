@@ -16,6 +16,8 @@ import com.wwimmo.imageeditor.utils.Utility;
 import com.wwimmo.imageeditor.utils.entities.BorderStyle;
 import com.wwimmo.imageeditor.utils.layers.Layer;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 @SuppressWarnings({"WeakerAccess"})
 public abstract class MotionEntity {
 
@@ -71,9 +73,27 @@ public abstract class MotionEntity {
     @NonNull
     private BorderStyle borderStyle = BorderStyle.DASHED;
 
+    public final int id;
+
+    public final String userId;
+
+    public MotionEntity(String userId,
+                        int id,
+                        @NonNull Layer layer,
+                        @IntRange(from = 1) int canvasWidth,
+                        @IntRange(from = 1) int canvasHeight) {
+        this.userId = userId;
+        this.id = id;
+        this.layer = layer;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+    }
+
     public MotionEntity(@NonNull Layer layer,
                         @IntRange(from = 1) int canvasWidth,
                         @IntRange(from = 1) int canvasHeight) {
+        this.userId = "";
+        this.id = ThreadLocalRandom.current().nextInt(1, 10000000);   
         this.layer = layer;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;

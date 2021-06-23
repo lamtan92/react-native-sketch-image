@@ -68,6 +68,7 @@ public class ImageEditor extends View {
     private MoveGestureDetector mMoveGestureDetector;
     private GestureDetectorCompat mGestureDetectorCompat;
     private boolean mGesturesEnabled;
+    private String mUser;
 
     // Shapes/Entities
     private final ArrayList<MotionEntity> mEntities = new ArrayList<MotionEntity>();
@@ -107,6 +108,7 @@ public class ImageEditor extends View {
         this.mMoveGestureDetector = new MoveGestureDetector(context, new MoveListener());
         this.mGestureDetectorCompat = new GestureDetectorCompat(context, new TapsListener());
         this.mGesturesEnabled = true;
+        this.mUser = "";
 
         // Is initialized at bottom of class w/ other GestureDetectors
         setOnTouchListener(mOnTouchListener);
@@ -387,6 +389,25 @@ public class ImageEditor extends View {
         }
     }
 
+    public void onShapeSelectionUpdated() {
+        if (mSelectedEntity != null) {
+            final WritableMap event = Arguments.createMap();
+            event.putBoolean("isShapeUpdated", true);
+            event.putInt("shapeId",mSelectedEntity.id);
+            event.putDouble("shapeScale",mSelectedEntity.getLayer().getScale());
+            event.putDouble("shapeRotate",mSelectedEntity.getLayer().getRotationInDegrees());
+            event.putDouble("shapeCenterX",mSelectedEntity.absoluteCenterX());
+            event.putDouble("shapeCenterY",mSelectedEntity.absoluteCenterY());
+            event.putDouble("shapeWidth",mSelectedEntity.getWidth());
+            event.putDouble("shapeHeight",mSelectedEntity.getHeight());
+
+            mContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                    getId(),
+                    "topChange",
+                    event);
+        }
+    }
+
     public void onSaved(boolean success, String path) {
         WritableMap event = Arguments.createMap();
         event.putBoolean("success", success);
@@ -530,6 +551,10 @@ public class ImageEditor extends View {
         mGesturesEnabled = enabled;
     }
 
+    public void setUser(String user) {
+        mUser = user;
+    }
+
     public void setCanvasText(ReadableArray aText) {
         mArrCanvasText.clear();
         mArrSketchOnText.clear();
@@ -624,33 +649,55 @@ public class ImageEditor extends View {
      * MotionEntities related code
      *
      **/
-    public void addEntity(EntityType shapeType, String textShapeFontType, int textShapeFontSize, String textShapeText, String imageShapeAsset) {
-        switch(shapeType) {
-            case CIRCLE:
-                addCircleEntity();
-                break;
-            case TEXT:
-                addTextEntity(textShapeFontType, textShapeFontSize, textShapeText);
-                break;
-            case RECT:
-                addRectEntity(600, 300);
-                break;
-            case SQUARE:
-                addSquareEntity(600);
-                break;
-            case TRIANGLE:
-                addTriangleEntity();
-                break;
-            case ARROW:
-                addArrowEntity();
-                break;
-            case IMAGE:
-                // TODO: Doesn't exist yet
-                break;
-            default:
-                addCircleEntity();
-                break;
+    public void addEntity(EntityType shapeType, String textShapeFontType, int textShapeFontSize, String textShapeText, String imageShapeAsset, String userId, int id, float x, float y, float scale, float rotate, int color) {
+        MotionEntity _entity = findEntityById(id);
+
+        if (_entity != null) {
+            selectEntity(_entity);
+            switch(shapeType) { 
+                case TEXT:
+                    TextEntity textEntity = getSelectedTextEntity();
+                    if (textEntity != null) {
+                        textEntity.moveCenterTo(new PointF(x * 1.0F, y * 1.0F));
+                        textEntity.getLayer().setScale(scale * 1.0F);
+                        textEntity.getLayer().setRotationInDegrees(rotate * 1.0F);
+                        textEntity.updateEntity();
+                        invalidateCanvas(true);
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        } else {
+            switch(shapeType) {
+                case CIRCLE:
+                    addCircleEntity();
+                    break;
+                case TEXT:
+                    addTextEntity(userId, id, textShapeFontType, textShapeFontSize, textShapeText, x, y, scale, rotate, color);
+                    break;
+                case RECT:
+                    addRectEntity(600, 300);
+                    break;
+                case SQUARE:
+                    addSquareEntity(600);
+                    break;
+                case TRIANGLE:
+                    addTriangleEntity();
+                    break;
+                case ARROW:
+                    addArrowEntity();
+                    break;
+                case IMAGE:
+                    // TODO: Doesn't exist yet
+                    break;
+                default:
+                    addCircleEntity();
+                    break;
+            }
         }
+
+       
     }
 
     protected void addCircleEntity() {
@@ -725,8 +772,8 @@ public class ImageEditor extends View {
         invalidateCanvas(true);
     }
 
-    protected void addTextEntity(String fontType, int fontSize, String text) {
-        TextLayer textLayer = createTextLayer(fontType, fontSize);
+    protected void addTextEntity(String userId, int id, String fontType, int fontSize, String text, float x, float y, float scale, float rotate, int color) {
+        TextLayer textLayer = createTextLayer(fontType, fontSize, color);
         if (text != null) {
             textLayer.setText(text);
         } else {
@@ -735,26 +782,35 @@ public class ImageEditor extends View {
 
         TextEntity textEntity = null;
         if (mSketchCanvas.getWidth() < 100 || mSketchCanvas.getHeight() < 100) {
-            textEntity = new TextEntity(textLayer, mDrawingCanvas.getWidth(), mDrawingCanvas.getHeight());
+            textEntity = new TextEntity(userId, id, textLayer, mDrawingCanvas.getWidth(), mDrawingCanvas.getHeight());
         } else {
-            textEntity = new TextEntity(textLayer, mSketchCanvas.getWidth(), mSketchCanvas.getHeight());
+            textEntity = new TextEntity(userId, id, textLayer, mSketchCanvas.getWidth(), mSketchCanvas.getHeight());
         }
         addEntityAndPosition(textEntity);
 
         PointF center = textEntity.absoluteCenter();
-        center.y = center.y * 0.5F;
-        textEntity.moveCenterTo(center);
+        
+        if (x != 0.0f && y != 0.0f) {
+            textEntity.moveCenterTo(new PointF(x * 1.0F, y * 1.0F));
+            textEntity.getLayer().setScale(scale * 1.0F);
+            textEntity.getLayer().setRotationInDegrees(rotate * 1.0F);
+        } else {
+            center.y = center.y * 0.5F;
+            textEntity.moveCenterTo(center);
+        }
+
+        onShapeSelectionUpdated();
 
         invalidateCanvas(true);
     }
 
-    private TextLayer createTextLayer(String fontType, int fontSize) {
+    private TextLayer createTextLayer(String fontType, int fontSize, int color) {
         TextLayer textLayer = new TextLayer(mContext);
         Font font = new Font(mContext, null);
         font.setColor(mEntityStrokeColor);
 
         if (fontSize > 0) {
-            float convertedFontSize = (float)fontSize / 200;
+            float convertedFontSize = (float)fontSize / 500;
             font.setSize(convertedFontSize);
         } else {
             font.setSize(TextLayer.Limits.INITIAL_FONT_SIZE);
@@ -828,6 +884,8 @@ public class ImageEditor extends View {
             if (needUpdateUI) {
                 invalidateCanvas(true);
             }
+
+            onShapeSelectionUpdated();
         }
     }
 
@@ -861,6 +919,12 @@ public class ImageEditor extends View {
 
     private void updateSelectionOnTap(MotionEvent e) {
         MotionEntity entity = findEntityAtPoint(e.getX(), e.getY());
+
+        if (entity != null) {
+            if (!entity.userId.equals(mUser)) {
+                return;
+            }
+        }
         onShapeSelectionChanged(entity);
         selectEntity(entity);
     }
@@ -885,8 +949,39 @@ public class ImageEditor extends View {
         }
     }
 
+    public void deleteShape(int id) {
+        MotionEntity toRemoveEntity = null;
+        for (MotionEntity entity : mEntities) {
+            if (entity.id == id) {
+                toRemoveEntity = entity;
+                break;
+            }
+        }
+        if (toRemoveEntity != null) {
+            toRemoveEntity.setIsSelected(false);
+            if (mEntities.remove(toRemoveEntity)) {
+                toRemoveEntity.release();
+                toRemoveEntity = null;
+                mSelectedEntity = toRemoveEntity;
+                onShapeSelectionChanged(toRemoveEntity);
+                invalidateCanvas(true);
+            }
+        }
+    }
+
     public void unselectShape() {
         selectEntity(null);
+    }
+
+    private MotionEntity findEntityById(int id) {
+        MotionEntity selectedEntity = null;
+        for (MotionEntity entity : mEntities) {
+            if (entity.id == id) {
+                selectedEntity = entity;
+                break;
+            }
+        }
+        return selectedEntity;
     }
 
     public void increaseTextEntityFontSize() {
@@ -960,7 +1055,7 @@ public class ImageEditor extends View {
                 return false;
             }
 
-            if (mSelectedEntity != null) {
+            if (mSelectedEntity != null &&  mSelectedEntity.userId.equals(mUser)) {
                 return true;
             }
             return false;
@@ -989,10 +1084,11 @@ public class ImageEditor extends View {
                 return false;
             }
 
-            if (mSelectedEntity != null) {
+            if (mSelectedEntity != null && mSelectedEntity.userId.equals(mUser)) {
                 float scaleFactorDiff = detector.getScaleFactor();
                 mSelectedEntity.getLayer().postScale(scaleFactorDiff - 1.0F);
                 invalidateCanvas(true);
+                onShapeSelectionUpdated();
                 return true;
             }
             return false;
@@ -1007,9 +1103,10 @@ public class ImageEditor extends View {
                 return false;
             }
 
-            if (mSelectedEntity != null) {
+            if (mSelectedEntity != null && mSelectedEntity.userId.equals(mUser)) {
                 mSelectedEntity.getLayer().postRotate(-detector.getRotationDegreesDelta());
                 invalidateCanvas(true);
+                onShapeSelectionUpdated();
                 return true;
             }
             return false;
@@ -1024,7 +1121,7 @@ public class ImageEditor extends View {
                 return false;
             }
 
-            if (mSelectedEntity != null) {
+            if (mSelectedEntity != null && mSelectedEntity.userId.equals(mUser)) {
                 handleTranslate(detector.getFocusDelta());
                 return true;
             }

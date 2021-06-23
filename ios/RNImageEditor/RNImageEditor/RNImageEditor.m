@@ -13,6 +13,8 @@
 #import "entities/TriangleEntity.h"
 #import "entities/ArrowEntity.h"
 #import "entities/TextEntity.h"
+#import <React/RCTLog.h>
+
 
 @implementation RNImageEditor
 {
@@ -53,6 +55,7 @@
         self.entityStrokeColor = [UIColor blackColor];
 
         self.gesturesEnabled = YES;
+        self.user = @"";
 
         self.tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
         self.tapGesture.delegate = self;
@@ -65,6 +68,7 @@
         self.moveGesture.delegate = self;
         self.moveGesture.minimumNumberOfTouches = 1;
         self.moveGesture.maximumNumberOfTouches = 1;
+        self.moveGesture.enabled = false;
 
         self.scaleGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handleScale:)];
         self.scaleGesture.delegate = self;
@@ -142,7 +146,8 @@
                    borderStrokeWidth:self.entityBorderStrokeWidth
                    borderStrokeColor:self.entityBorderColor
                    entityStrokeWidth:self.entityStrokeWidth
-                   entityStrokeColor:self.entityStrokeColor];
+                   entityStrokeColor:self.entityStrokeColor
+                   ];
 
         if ([entity isSelected]) {
             [entity setNeedsDisplay];
@@ -760,8 +765,11 @@
         [entity setNeedsDisplay];
         [self setFrozenImageNeedsUpdate];
         [self setNeedsDisplayInRect:entity.bounds];
+        self.moveGesture.enabled = true;
+
     } else {
         [self setNeedsDisplay];
+        self.moveGesture.enabled = false;
     }
     self.selectedEntity = entity;
 }
@@ -770,7 +778,7 @@
     MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
     if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
             // Return if the gestures are disabled
-            if(!self.gesturesEnabled){
+            if(!self.gesturesEnabled || self.user != nextEntity.userId){
                 return;
         }
     }
@@ -783,6 +791,18 @@
     CGPoint point = CGPointMake(x, y);
     for (MotionEntity *entity in self.motionEntities) {
         if ([entity isPointInEntity:point]) {
+            nextEntity = entity;
+            break;
+        }
+    }
+    return nextEntity;
+}
+
+- (MotionEntity *)findEntityById:(NSInteger)id {
+    MotionEntity *nextEntity = nil;
+    for (MotionEntity *entity in self.motionEntities) {
+        NSInteger motionId = [entity getId];
+        if (motionId == id) {
             nextEntity = entity;
             break;
         }
@@ -835,6 +855,14 @@
     }
 }
 
+- (void)moveEntityX:(float)x Y: (float)y rotation:(float) rotation newScale:(float) newScale{
+     TextEntity *textEntity = [self getSelectedTextEntity];
+    if (self.selectedEntity) {
+        CGPoint nextPosition = CGPointMake(x, y);
+        [self.selectedEntity updateEntity: nextPosition rotationInRadians:rotation newScale:newScale];
+    }
+}
+
 - (TextEntity *)getSelectedTextEntity {
     if (self.selectedEntity && [self.selectedEntity isKindOfClass:[TextEntity class]]) {
         return (TextEntity *)self.selectedEntity;
@@ -842,6 +870,100 @@
         return nil;
     }
 }
+
+- (void)deleteShape:(int) shapeId {
+    MotionEntity *entityToRemove = nil;
+    for (MotionEntity *entity in self.motionEntities) {
+        if (entity.id == shapeId) {
+            entityToRemove = entity;
+            break;
+        }
+    }
+    if (entityToRemove) {
+        [self.motionEntities removeObject:entityToRemove];
+        [entityToRemove removeFromSuperview];
+        entityToRemove = nil;
+        [self selectEntity:entityToRemove];
+        [self onShapeSelectionChanged:nil];
+    }
+}
+
+- (void)addShapeEntity:(NSString *)entityType textShapeFontType:(NSString *)textShapeFontType textShapeFontSize:(NSNumber *)textShapeFontSize textShapeText:(NSString *)textShapeText imageShapeAsset:(NSString *)imageShapeAsset userId:(NSString *)userId shapeId:(NSInteger)shapeId x:(float)x y:(float)y scale:(float)scale rotate:(float)rotate color:(UIColor*) color {
+
+    switch ([@[@"Circle", @"Rect", @"Square", @"Triangle", @"Arrow", @"Text", @"Image"] indexOfObject: entityType]) {
+        case 1:
+            [self addRectEntity:300 andHeight:150];
+            break;
+        case 2:
+            [self addRectEntity:300 andHeight:300];
+            break;
+        case 3:
+            [self addTriangleEntity];
+            break;
+        case 4:
+            [self addArrowEntity];
+            break;
+        case 5:
+            [self addShapeTextEntity:textShapeFontType withFontSize:textShapeFontSize withText:textShapeText userId:userId shapeId:shapeId x:x y:y scale:scale rotate:rotate color:color];
+            break;
+        case 6:
+            // TODO: ImageEntity Doesn't exist yet
+        case 0:
+        case NSNotFound:
+        default: {
+            [self addCircleEntity];
+            break;
+        }
+    }
+}
+
+
+- (void)addShapeTextEntity:(NSString *)fontType withFontSize: (NSNumber *)fontSize withText: (NSString *)text userId: (NSString *)userId shapeId:(NSInteger)shapeId x:(float)x y:(float)y scale:(float)scale rotate:(float)rotate color:(UIColor*) color {
+    CGFloat centerX = CGRectGetMidX(self.bounds);
+    CGFloat centerY = CGRectGetMidY(self.bounds);
+
+    MotionEntity *nextEntity = [self findEntityById:shapeId];
+    CGFloat rotateInRad = rotate * (M_PI / 180);
+
+    if (nextEntity) {
+        [self selectEntity:nextEntity];
+        [self moveEntityX:x Y:y rotation:rotateInRad newScale:scale];
+        // [self.selectedEntity rotateEntityBy:rotateInRad];
+        // [self.selectedEntity scaleEntityBy:scale];
+        [self.selectedEntity setNeedsDisplay];
+        [self onShapeSelectionChanged:self.selectedEntity];
+        [self onShapeSelectionUpdated:self.selectedEntity];
+    } else {
+        TextEntity *entity = [[TextEntity alloc]
+                                initAndSetupWithParent:self.bounds.size.width
+                                parentHeight:self.bounds.size.height
+                                parentCenterX:x
+                                parentCenterY:y
+                                parentScreenScale:self.window.screen.scale
+                                text:text
+                                fontType:fontType
+                                fontSize:[fontSize floatValue]
+                                bordersPadding:5.0f
+                                borderStyle:self.entityBorderStyle
+                                borderStrokeWidth:self.entityBorderStrokeWidth
+                                borderStrokeColor:self.entityBorderColor
+                                entityStrokeWidth:self.entityStrokeWidth
+                                entityStrokeColor:color
+                                id:shapeId
+                                userId:userId];
+
+        [entity rotateEntityBy:rotateInRad];
+        [entity scaleEntityBy:scale];
+
+        [self.motionEntities addObject:entity];
+        [self onShapeSelectionChanged:entity];
+        [self onShapeSelectionUpdated:entity];
+        [self selectEntity:entity];
+    }
+
+    
+}
+
 
 #pragma mark - UIGestureRecognizers
 - (void)handleTap:(UITapGestureRecognizer *)sender {
@@ -867,16 +989,17 @@
 
     // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        if (nextEntity) {
-            if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
-                // Return if the gestures are disabled
-                if(!self.gesturesEnabled){
-                    return;
-                }
+       
+       if (self.selectedEntity) {
+            if(!self.gesturesEnabled || self.user != nextEntity.userId){
+                return;
             }
-            [nextEntity rotateEntityBy:sender.rotation];
-            [self setNeedsDisplayInRect:nextEntity.bounds];
-        }
+        
+            [self.selectedEntity rotateEntityBy:sender.rotation];
+            [self setNeedsDisplayInRect:self.selectedEntity.bounds];
+            [self onShapeSelectionUpdated:self.selectedEntity];
+       }
+            // Return if the gestures are disabled
         [sender setRotation:0.0];
     }
 }
@@ -890,17 +1013,24 @@
     MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
 
     // Then if we have an entity, we try to move it
-    if (nextEntity) {
-        if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+    if (self.selectedEntity) {
+        // if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
             // Return if the gestures are disabled
-            if(!self.gesturesEnabled){
+            if(!self.gesturesEnabled || self.user != nextEntity.userId){
                 return;
             }
-        }
+        // }
+        CGPoint nextPosition = [sender translationInView: self.selectedEntity];
+
         if (state != UIGestureRecognizerStateCancelled) {
-            [nextEntity moveEntityTo:[sender translationInView:nextEntity]];
+            [self.selectedEntity moveEntityTo: nextPosition];
+            [self onShapeSelectionUpdated:self.selectedEntity];
             [sender setTranslation:CGPointZero inView:sender.view];
-            [self setNeedsDisplayInRect:nextEntity.bounds];
+            [self setNeedsDisplayInRect:self.selectedEntity.bounds];
+        }
+
+        if (state == UIGestureRecognizerStateEnded) {
+            [self onShapeSelectionUpdated:self.selectedEntity];
         }
     }
 }
@@ -913,17 +1043,23 @@
     CGPoint tapLocation = [sender locationInView:sender.view];
     MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
 
+
     // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        if (nextEntity) {
-            if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
-                // Return if the gestures are disabled
-                if(!self.gesturesEnabled){
-                    return;
-                }
+        RCTLogInfo(@"Message Start Scale");
+
+        if (self.selectedEntity != nil) {
+            // if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
+            // Return if the gestures are disabled
+            if(!self.gesturesEnabled){
+                return;
             }
-            [nextEntity scaleEntityBy:sender.scale];
-            [self setNeedsDisplayInRect:nextEntity.bounds];
+            // }
+            [self.selectedEntity scaleEntityBy:sender.scale];
+            [self setNeedsDisplayInRect:self.selectedEntity.bounds];
+            RCTLogInfo(@"Message Scale: %@", @(sender.scale));
+            [self onShapeSelectionUpdated:self.selectedEntity];
+
         }
         [sender setScale:1.0];
     }
@@ -958,6 +1094,18 @@
         } else {
             _onChange(@{ @"isShapeSelected": @NO, @"shapeText": @"" });
         }
+    }
+}
+
+- (void)onShapeSelectionUpdated:(MotionEntity *)nextEntity {
+    if (_onChange) {
+        NSInteger id = [nextEntity getId];
+        CGPoint centerPoint = [nextEntity getCenterPoint];
+        CGSize size = [nextEntity getEntitySize];
+        CGFloat angle = atan2f(nextEntity.transform.b, nextEntity.transform.a);
+        angle = angle * (180 / M_PI);
+       
+        _onChange(@{ @"isShapeUpdated": @YES, @"shapeId": @(id), @"shapeCenterX": @(centerPoint.x), @"shapeCenterY": @(centerPoint.y), @"shapeScale":@(nextEntity.transform.a), @"shapeRotate":@(angle), @"shapeWidth":@(size.width), @"shapeHeight":@(size.height)});
     }
 }
 

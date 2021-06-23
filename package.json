@@ -19,5 +19,8 @@
         "draw"
     ],
     "nativePackage": true,
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "react-native-uuid": "^2.0.1"
+    }
 }

@@ -30,7 +30,24 @@
 @property (nonatomic) UIColor* borderStrokeColor;
 @property (nonatomic) CGFloat entityStrokeWidth;
 @property (nonatomic) UIColor* entityStrokeColor;
+@property (nonatomic) NSInteger id;
+@property (nonatomic) NSString* userId;
 
+- (instancetype)initAndSetupWithParent: (NSInteger)parentWidth
+                          parentHeight: (NSInteger)parentHeight
+                         parentCenterX: (CGFloat)parentCenterX
+                         parentCenterY: (CGFloat)parentCenterY
+                     parentScreenScale: (CGFloat)parentScreenScale
+                                 width: (NSInteger)width
+                                height: (NSInteger)height
+                        bordersPadding: (CGFloat)bordersPadding
+                           borderStyle: (enum BorderStyle)borderStyle
+                     borderStrokeWidth: (CGFloat)borderStrokeWidth
+                     borderStrokeColor: (UIColor *)borderStrokeColor
+                     entityStrokeWidth: (CGFloat)entityStrokeWidth
+                     entityStrokeColor: (UIColor *)entityStrokeColor
+                                    id: (NSInteger)id
+                                userId: (NSString *)userId;
 
 - (instancetype)initAndSetupWithParent: (NSInteger)parentWidth
                           parentHeight: (NSInteger)parentHeight
@@ -48,10 +65,16 @@
 
 - (BOOL)isEntitySelected;
 - (BOOL)isPointInEntity:(CGPoint)point;
+- (CGPoint)getCenterPoint;
+- (CGSize)getEntitySize;
+- (NSInteger)getId;
 - (void)setIsSelected:(BOOL)isSelected;
 - (void)rotateEntityBy:(CGFloat)rotationInRadians;
 - (void)moveEntityTo:(CGPoint)locationDiff;
 - (void)scaleEntityBy:(CGFloat)newScale;
+- (void)updateEntity:(CGPoint)location 
+           rotationInRadians:(CGFloat)rotationInRadians
+           newScale:(CGFloat)newScale;
 - (void)updateStrokeSettings: (enum BorderStyle)borderStyle
            borderStrokeWidth: (CGFloat)borderStrokeWidth
            borderStrokeColor: (UIColor *)borderStrokeColor

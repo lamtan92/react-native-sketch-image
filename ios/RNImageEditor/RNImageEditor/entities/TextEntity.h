@@ -32,6 +32,24 @@
                      borderStrokeWidth: (CGFloat)borderStrokeWidth
                      borderStrokeColor: (UIColor *)borderStrokeColor
                      entityStrokeWidth: (CGFloat)entityStrokeWidth
+                     entityStrokeColor: (UIColor *)entityStrokeColor
+                                    id: (NSInteger)id
+                                userId: (NSString *)userId;
+;
+
+- (instancetype)initAndSetupWithParent: (NSInteger)parentWidth
+                          parentHeight: (NSInteger)parentHeight
+                         parentCenterX: (CGFloat)parentCenterX
+                         parentCenterY: (CGFloat)parentCenterY
+                     parentScreenScale: (CGFloat)parentScreenScale
+                                  text: (NSString *)text
+                              fontType: (NSString *)fontType
+                              fontSize: (CGFloat)fontSize
+                        bordersPadding: (CGFloat)bordersPadding
+                           borderStyle: (enum BorderStyle)borderStyle
+                     borderStrokeWidth: (CGFloat)borderStrokeWidth
+                     borderStrokeColor: (UIColor *)borderStrokeColor
+                     entityStrokeWidth: (CGFloat)entityStrokeWidth
                      entityStrokeColor: (UIColor *)entityStrokeColor;
 
 - (void)updateText: (NSString *)newText;

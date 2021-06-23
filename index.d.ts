@@ -40,6 +40,15 @@ type CanvasText = {
     lineHeightMultiple?: number;
 };
 
+type Mode = "draw" | "text" | "select";
+
+type Operation = {
+    id: string,
+    userId: string,
+    timestamp: number,
+    data: object
+}
+
 export interface SavePreference {
     folder: string;
     filename: string;
@@ -111,6 +120,7 @@ export interface ImageEditorProps {
     onSketchSaved?: (result: boolean, path: string) => void;
     onPathsChange?: (pathsCount: number) => void;
     onShapeSelectionChanged?: (isShapeSelected: boolean, shapeText: string) => void;
+    onOperationsChange?: (updatedOperation, allOperations) => void;
 }
 
 export class ImageEditor extends React.Component<ImageEditorProps & ViewProperties> {
@@ -232,9 +242,10 @@ export interface RNImageEditorProps {
     shapeConfiguration?: ShapeConfiguration;
 
     gesturesEnabled?: boolean;
+    onOperationsChange?: (updatedOperation, allOperations) => void;
 }
 
-export default class RNImageEditor extends React.Component<RNImageEditorProps & ViewProperties> {
+export class RNImageEditor extends React.Component<RNImageEditorProps & ViewProperties> {
     clear(): void;
     undo(): number;
     addPath(data: Path): void;
@@ -247,6 +258,11 @@ export default class RNImageEditor extends React.Component<RNImageEditorProps & 
     changeSelectedShapeText(newText: String): void;
     save(): void;
     nextStrokeWidth(): void;
+    
+    mode?: Mode;
+    onModeChanged(mode: Mode): void;
+
+    getOperations?:() => Operation[];
 
     static MAIN_BUNDLE: string;
     static DOCUMENT: string;

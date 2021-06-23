@@ -1,10 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
-import ReactNative, { View, Text, TouchableOpacity, FlatList, ViewPropTypes } from "react-native";
+import ReactNative, {
+    View,
+    Text,
+    TouchableOpacity,
+    FlatList,
+    ViewPropTypes,
+    Modal,
+    Pressable,
+    StyleSheet,
+    TextInput,
+    TouchableWithoutFeedback,
+} from "react-native";
+import uuid from "react-native-uuid";
 import ImageEditor from "./src/ImageEditor";
 import { requestPermissions } from "./src/handlePermissions";
 
-export default class RNImageEditor extends React.Component {
+class RNSketchCanvas extends React.Component {
     static propTypes = {
         containerStyle: ViewPropTypes.style,
         canvasStyle: ViewPropTypes.style,
@@ -43,7 +55,7 @@ export default class RNImageEditor extends React.Component {
             shapeBorderStyle: PropTypes.string,
             shapeBorderStrokeWidth: PropTypes.number,
             shapeColor: PropTypes.string,
-            shapeStrokeWidth: PropTypes.number
+            shapeStrokeWidth: PropTypes.number,
         }),
 
         text: PropTypes.arrayOf(
@@ -57,19 +69,31 @@ export default class RNImageEditor extends React.Component {
                 position: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
                 coordinate: PropTypes.oneOf(["Absolute", "Ratio"]),
                 alignment: PropTypes.oneOf(["Left", "Center", "Right"]),
-                lineHeightMultiple: PropTypes.number
+                lineHeightMultiple: PropTypes.number,
             })
         ),
         localSourceImage: PropTypes.shape({
             filename: PropTypes.string,
             directory: PropTypes.string,
-            mode: PropTypes.string
+            mode: PropTypes.string,
         }),
 
         permissionDialogTitle: PropTypes.string,
         permissionDialogMessage: PropTypes.string,
 
-        gesturesEnabled: PropTypes.bool
+        gesturesEnabled: PropTypes.bool,
+
+        mode: PropTypes.oneOf(["draw", "text"]),
+        onModeChanged: PropTypes.func,
+        operations: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.string,
+                userId: PropTypes.string,
+                timestamp: PropTypes.number,
+                data: PropTypes.object,
+            })
+        ),
+        onOperationsChange: PropTypes.func,
     };
 
     static defaultProps = {
@@ -112,7 +136,7 @@ export default class RNImageEditor extends React.Component {
             { color: "#A52A2A" },
             { color: "#800000" },
             { color: "#008000" },
-            { color: "#808000" }
+            { color: "#808000" },
         ],
         alphlaValues: ["33", "77", "AA", "FF"],
         defaultStrokeIndex: 0,
@@ -130,14 +154,20 @@ export default class RNImageEditor extends React.Component {
             shapeBorderStyle: "Dashed",
             shapeBorderStrokeWidth: 1,
             shapeColor: "#000000",
-            shapeStrokeWidth: 3
+            shapeStrokeWidth: 3,
         },
 
         text: null,
         localSourceImage: null,
 
         permissionDialogTitle: "",
-        permissionDialogMessage: ""
+        permissionDialogMessage: "",
+
+        mode: "text",
+        onModeChanged: () => {},
+
+        operations: [],
+        onOperationsChange: () => {},
     };
 
     constructor(props) {
@@ -146,7 +176,10 @@ export default class RNImageEditor extends React.Component {
         this.state = {
             color: props.strokeColors[props.defaultStrokeIndex].color,
             strokeWidth: props.defaultStrokeWidth,
-            alpha: "FF"
+            alpha: "FF",
+            isShowAddTextModal: false,
+            textConfig: null,
+            textContent: "",
         };
 
         this._colorChanged = false;
@@ -162,8 +195,20 @@ export default class RNImageEditor extends React.Component {
         return this._sketchCanvas.undo();
     }
 
+    undoOperation = () => {
+        return this._sketchCanvas.undoOperation();
+    };
+
+    redoOperation = () => {
+        return this._sketchCanvas.redoOperation();
+    };
+
     addPath(data) {
         this._sketchCanvas.addPath(data);
+    }
+
+    addOperation(operation) {
+        this._sketchCanvas.addOperation(operation);
     }
 
     deletePath(id) {
@@ -276,7 +321,116 @@ export default class RNImageEditor extends React.Component {
         );
     }
 
+    _renderSideBar = () => {
+        return (
+            <View
+                style={{
+                    position: "absolute",
+                    width: 70,
+                    left: 5,
+                    top: 50,
+                    bottom: 50,
+                    backgroundColor: "yellow",
+                }}
+            >
+                <TouchableOpacity
+                    style={{
+                        opacity: this.props.mode === "text" ? 0.5 : 1,
+                    }}
+                    disabled={this.props.mode === "draw"}
+                    onPress={() => {
+                        this.props.onModeChanged("draw");
+                    }}
+                >
+                    <View
+                        style={{
+                            marginHorizontal: 2.5,
+                            marginVertical: 8,
+                            height: 30,
+                            width: 60,
+                            backgroundColor: "#39579A",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text style={{ color: "white" }}>Draw</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{
+                        opacity: this.props.mode === "draw" ? 0.5 : 1,
+                    }}
+                    disabled={this.props.mode === "text"}
+                    onPress={() => {
+                        this.props.onModeChanged("text");
+                    }}
+                >
+                    <View
+                        style={{
+                            marginHorizontal: 2.5,
+                            marginVertical: 8,
+                            height: 30,
+                            width: 60,
+                            backgroundColor: "#39579A",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text style={{ color: "white" }}>Text</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    // disabled={this._sketchCanvas.getOperations().length === 0}
+                    onPress={() => {
+                        this.undoOperation();
+                    }}
+                >
+                    <View
+                        style={{
+                            marginHorizontal: 2.5,
+                            marginVertical: 8,
+                            height: 30,
+                            width: 60,
+                            backgroundColor: "#39579A",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text style={{ color: "white" }}>Undo</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    // disabled={this._sketchCanvas.getOperations().length === 0}
+                    onPress={() => {
+                        this.redoOperation();
+                    }}
+                >
+                    <View
+                        style={{
+                            marginHorizontal: 2.5,
+                            marginVertical: 8,
+                            height: 30,
+                            width: 60,
+                            backgroundColor: "#39579A",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text style={{ color: "white" }}>Redo</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
     render() {
+        const { mode } = this.props;
+        const { isShowAddTextModal, textConfig, textContent } = this.state;
+
         return (
             <View style={this.props.containerStyle}>
                 <View style={{ flexDirection: "row" }}>
@@ -374,6 +528,14 @@ export default class RNImageEditor extends React.Component {
                     localSourceImage={this.props.localSourceImage}
                     permissionDialogTitle={this.props.permissionDialogTitle}
                     permissionDialogMessage={this.props.permissionDialogMessage}
+                    mode={mode}
+                    onAddTextShape={(pos, size) => {
+                        this.setState({
+                            isShowAddTextModal: true,
+                            textConfig: { pos },
+                        });
+                    }}
+                    onOperationsChange={this.props.onOperationsChange}
                 />
                 <View style={{ flexDirection: "row" }}>
                     <FlatList
@@ -385,14 +547,125 @@ export default class RNImageEditor extends React.Component {
                         showsHorizontalScrollIndicator={false}
                     />
                 </View>
+                {this._renderSideBar()}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isShowAddTextModal}
+                    onRequestClose={() => {
+                        this.setState({
+                            isShowAddTextModal: false,
+                        });
+                    }}
+                >
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            this.setState({
+                                isShowAddTextModal: false,
+                                textContent: "",
+                                textConfig: {},
+                            });
+                        }}
+                    >
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <TextInput
+                                    style={styles.modalText}
+                                    placeholder="Input your text components"
+                                    value={textContent}
+                                    onChangeText={(text) => {
+                                        this.setState({
+                                            textContent: text,
+                                        });
+                                    }}
+                                />
+                                <Pressable
+                                    style={[styles.button, styles.buttonClose]}
+                                    onPress={() => {
+                                        const operation = {
+                                            id: uuid.v4(),
+                                            userId: this.props.user,
+                                            timestamp: Date.now(),
+                                            data: {
+                                                id: parseInt(Math.random() * 100000000),
+                                                text: textContent,
+                                                posCenter: textConfig.pos,
+                                                scale: 0.8,
+                                                rotate: 0.0,
+                                                type: "text",
+                                                size: 20,
+                                                color: "#4a4a4a",
+                                            },
+                                        };
+                                        this._sketchCanvas.addOperation(operation);
+                                        this.setState({
+                                            isShowAddTextModal: false,
+                                            textContent: "",
+                                            textConfig: {},
+                                        });
+                                    }}
+                                >
+                                    <Text style={styles.textStyle}>Add Text</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
             </View>
         );
     }
 }
 
-RNImageEditor.MAIN_BUNDLE = ImageEditor.MAIN_BUNDLE;
-RNImageEditor.DOCUMENT = ImageEditor.DOCUMENT;
-RNImageEditor.LIBRARY = ImageEditor.LIBRARY;
-RNImageEditor.CACHES = ImageEditor.CACHES;
+RNSketchCanvas.MAIN_BUNDLE = ImageEditor.MAIN_BUNDLE;
+RNSketchCanvas.DOCUMENT = ImageEditor.DOCUMENT;
+RNSketchCanvas.LIBRARY = ImageEditor.LIBRARY;
+RNSketchCanvas.CACHES = ImageEditor.CACHES;
+
+const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22,
+        backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonOpen: {
+        backgroundColor: "#F194FF",
+    },
+    buttonClose: {
+        backgroundColor: "#2196F3",
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center",
+    },
+});
+
+export default RNSketchCanvas;
 
 export { ImageEditor };
