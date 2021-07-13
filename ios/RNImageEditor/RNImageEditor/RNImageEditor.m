@@ -778,7 +778,7 @@
     MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
     if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
             // Return if the gestures are disabled
-            if(!self.gesturesEnabled || self.user != nextEntity.userId){
+            if(!self.gesturesEnabled || ![self.user isEqualToString: nextEntity.userId]){
                 return;
         }
     }
@@ -985,13 +985,13 @@
 
     // First we acquire the entity where the user is moving
     CGPoint tapLocation = [sender locationInView:sender.view];
-    MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    // MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
 
     // Then if we have an entity, we try to move it
     if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
        
        if (self.selectedEntity) {
-            if(!self.gesturesEnabled || self.user != nextEntity.userId){
+            if(!self.gesturesEnabled || ![self.user isEqualToString: self.selectedEntity.userId]){
                 return;
             }
         
@@ -1010,13 +1010,13 @@
 
     // First we acquire the entity where the user is moving
     CGPoint tapLocation = [sender locationInView:sender.view];
-    MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    // MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
 
     // Then if we have an entity, we try to move it
     if (self.selectedEntity) {
         // if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
             // Return if the gestures are disabled
-            if(!self.gesturesEnabled || self.user != nextEntity.userId){
+            if(!self.gesturesEnabled || ![self.user isEqualToString: self.selectedEntity.userId]){
                 return;
             }
         // }
@@ -1041,7 +1041,7 @@
 
     // First we acquire the entity where the user is moving
     CGPoint tapLocation = [sender locationInView:sender.view];
-    MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
+    // MotionEntity *nextEntity = [self findEntityAtPointX:tapLocation.x andY:tapLocation.y];
 
 
     // Then if we have an entity, we try to move it
@@ -1051,7 +1051,7 @@
         if (self.selectedEntity != nil) {
             // if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
             // Return if the gestures are disabled
-            if(!self.gesturesEnabled){
+            if(!self.gesturesEnabled || ![self.user isEqualToString: self.selectedEntity.userId]){
                 return;
             }
             // }
