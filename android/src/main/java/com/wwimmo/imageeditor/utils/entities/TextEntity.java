@@ -130,9 +130,9 @@ public class TextEntity extends MotionEntity {
 
     private void updatePaint(@Nullable Paint paint) {
         if (paint != null && isSelected()) {
-            int color = paint.getColor();
-            getLayer().getFont().setColor(color);
-            textPaint.setColor(color);
+            // int color = paint.getColor();
+            // getLayer().getFont().setColor(color);
+            // textPaint.setColor(color);
         }
     }
 

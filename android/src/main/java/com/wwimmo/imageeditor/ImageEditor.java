@@ -807,7 +807,7 @@ public class ImageEditor extends View {
     private TextLayer createTextLayer(String fontType, int fontSize, int color) {
         TextLayer textLayer = new TextLayer(mContext);
         Font font = new Font(mContext, null);
-        font.setColor(mEntityStrokeColor);
+        font.setColor(color);
 
         if (fontSize > 0) {
             float convertedFontSize = (float)fontSize / 500;

@@ -53,7 +53,7 @@ public class ImageEditorManager extends SimpleViewManager<ImageEditor> {
     private static final String PROPS_TEXT = "text";
     private static final String PROPS_SHAPE_CONFIGURATION = "shapeConfiguration";
     private static final String PROPS_GESTURES_ENABLED = "gesturesEnabled";
-    private static final String PROPS_USRER = "user";
+    private static final String PROPS_USER = "user";
 
     @Override
     public String getName() {
@@ -94,7 +94,7 @@ public class ImageEditorManager extends SimpleViewManager<ImageEditor> {
         viewContainer.setGesturesEnabled(enabled);
     }
 
-    @ReactProp(name = PROPS_USRER)
+    @ReactProp(name = PROPS_USER)
     public void setUser(ImageEditor viewContainer, String user){
         viewContainer.setUser(user);
     }
