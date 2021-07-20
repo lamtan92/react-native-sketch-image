@@ -126,6 +126,7 @@ class ImageEditor extends React.Component {
         text: null,
         hasPanResponder: false,
         isShapeSelected: false,
+        selectedShapeId: -1,
     };
 
     constructor(props) {
@@ -356,7 +357,6 @@ class ImageEditor extends React.Component {
                             processColor(operation.data.color ? operation.data.color : this.props.strokeColor),
                         ]
                     );
-                    // this._operations.push(operation);
                     break;
                 default:
                     break;
@@ -563,9 +563,10 @@ class ImageEditor extends React.Component {
                     } else if (e.nativeEvent.hasOwnProperty("success")) {
                         this.props.onSketchSaved(e.nativeEvent.success);
                     } else if (e.nativeEvent.hasOwnProperty("isShapeSelected")) {
-                        this.props.onShapeSelectionChanged(e.nativeEvent.isShapeSelected, e.nativeEvent.shapeText);
+                        this.props.onShapeSelectionChanged(e.nativeEvent.isShapeSelected, e.nativeEvent.shapeId);
                         this.setState({
                             isShapeSelected: e.nativeEvent.isShapeSelected,
+                            selectedShapeId: e.nativeEvent.shapeId,
                         });
                     } else if (e.nativeEvent.hasOwnProperty("isShapeUpdated")) {
                         const {

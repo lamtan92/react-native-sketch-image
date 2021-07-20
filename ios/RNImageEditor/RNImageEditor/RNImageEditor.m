@@ -74,9 +74,9 @@
         self.scaleGesture.delegate = self;
 
         [self addGestureRecognizer:self.tapGesture];
-        [self addGestureRecognizer:self.rotateGesture];
+        // [self addGestureRecognizer:self.rotateGesture];
         [self addGestureRecognizer:self.moveGesture];
-        [self addGestureRecognizer:self.scaleGesture];
+        // [self addGestureRecognizer:self.scaleGesture];
 
     }
     return self;
@@ -855,11 +855,11 @@
     }
 }
 
-- (void)moveEntityX:(float)x Y: (float)y rotation:(float) rotation newScale:(float) newScale{
+- (void)moveEntityX:(float)x Y: (float)y rotation:(float) rotation newScale:(float) newScale color:(UIColor*) color{
      TextEntity *textEntity = [self getSelectedTextEntity];
     if (self.selectedEntity) {
         CGPoint nextPosition = CGPointMake(x, y);
-        [self.selectedEntity updateEntity: nextPosition rotationInRadians:rotation newScale:newScale];
+        [self.selectedEntity updateEntity: nextPosition rotationInRadians:rotation newScale:newScale color:color];
     }
 }
 
@@ -926,10 +926,11 @@
     CGFloat rotateInRad = rotate * (M_PI / 180);
 
     if (nextEntity) {
-        [self selectEntity:nextEntity];
-        [self moveEntityX:x Y:y rotation:rotateInRad newScale:scale];
-        // [self.selectedEntity rotateEntityBy:rotateInRad];
-        // [self.selectedEntity scaleEntityBy:scale];
+        if ([self.user isEqualToString: nextEntity.userId]) {
+            [self selectEntity:nextEntity];
+        }
+       
+        [self moveEntityX:x Y:y rotation:rotateInRad newScale:scale color:color];
         [self.selectedEntity setNeedsDisplay];
         [self onShapeSelectionChanged:self.selectedEntity];
         [self onShapeSelectionUpdated:self.selectedEntity];
@@ -958,10 +959,10 @@
         [self.motionEntities addObject:entity];
         [self onShapeSelectionChanged:entity];
         [self onShapeSelectionUpdated:entity];
-        [self selectEntity:entity];
+        if ([self.user isEqualToString: entity.userId]) {
+            [self selectEntity:entity];
+        }
     }
-
-    
 }
 
 
@@ -1087,12 +1088,12 @@
         if (isShapeSelected) {
             // If it's a class entity, we add back the shapeText
             if (nextEntity && [nextEntity isKindOfClass:[TextEntity class]]) {
-                _onChange(@{ @"isShapeSelected": @YES, @"shapeText": ((TextEntity *)nextEntity).text });
+                _onChange(@{ @"isShapeSelected": @YES, @"shapeId": @([nextEntity getId]) });
             } else {
-                _onChange(@{ @"isShapeSelected": @YES, @"shapeText": @"" });
+                _onChange(@{ @"isShapeSelected": @YES, @"shapeId": @([nextEntity getId]) });
             }
         } else {
-            _onChange(@{ @"isShapeSelected": @NO, @"shapeText": @"" });
+            _onChange(@{ @"isShapeSelected": @NO, @"shapeId": @(-1) });
         }
     }
 }

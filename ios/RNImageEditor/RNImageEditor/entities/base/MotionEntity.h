@@ -74,7 +74,8 @@
 - (void)scaleEntityBy:(CGFloat)newScale;
 - (void)updateEntity:(CGPoint)location 
            rotationInRadians:(CGFloat)rotationInRadians
-           newScale:(CGFloat)newScale;
+           newScale:(CGFloat)newScale
+           color:(UIColor *)color;
 - (void)updateStrokeSettings: (enum BorderStyle)borderStyle
            borderStrokeWidth: (CGFloat)borderStrokeWidth
            borderStrokeColor: (UIColor *)borderStrokeColor

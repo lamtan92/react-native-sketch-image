@@ -368,7 +368,7 @@ public class ImageEditor extends View {
         final WritableMap event = Arguments.createMap();
         boolean isShapeSelected = nextSelectedEntity != null;
         event.putBoolean("isShapeSelected", isShapeSelected);
-
+        event.putInt("shapeId", isShapeSelected ? nextSelectedEntity.id : -1);
         if (!isShapeSelected) {
             // This is ugly and actually was my last resort to fix the "do not draw when deselecting" problem
             // without breaking existing functionality
@@ -653,13 +653,14 @@ public class ImageEditor extends View {
         MotionEntity _entity = findEntityById(id);
 
         if (_entity != null) {
-            selectEntity(_entity);
+           
             switch(shapeType) { 
                 case TEXT:
-                    TextEntity textEntity = getSelectedTextEntity();
+                    TextEntity textEntity = getTextEntity(_entity);
                     if (textEntity != null) {
                         textEntity.moveCenterTo(new PointF(x * 1.0F, y * 1.0F));
                         textEntity.getLayer().setScale(scale * 1.0F);
+                        textEntity.getLayer().getFont().setColor(color);
                         textEntity.getLayer().setRotationInDegrees(rotate * 1.0F);
                         textEntity.updateEntity();
                         invalidateCanvas(true);
@@ -667,6 +668,10 @@ public class ImageEditor extends View {
                     break;
                 default: 
                     break;
+            }
+            if (_entity.userId.equals(mUser)) {
+                selectEntity(_entity);
+                invalidateCanvas(true);
             }
         } else {
             switch(shapeType) {
@@ -842,7 +847,9 @@ public class ImageEditor extends View {
             initialTranslateAndScale(entity);
             mEntities.add(entity);
             onShapeSelectionChanged(entity);
-            selectEntity(entity);
+            if (entity.userId.equals(mUser)) {
+                selectEntity(entity);
+            }
         }
     }
 
@@ -1019,6 +1026,14 @@ public class ImageEditor extends View {
         }
     }
 
+    private TextEntity getTextEntity(MotionEntity entity){
+        if (entity != null && entity instanceof TextEntity) {
+            return (TextEntity) entity;
+        } else {
+            return null;
+        }
+    }
+
     /**
      *
      * Gesture Listeners
@@ -1037,8 +1052,8 @@ public class ImageEditor extends View {
         public boolean onTouch(View v, MotionEvent event) {
             if (mScaleGestureDetector != null) {
                 mGestureDetectorCompat.onTouchEvent(event);
-                mScaleGestureDetector.onTouchEvent(event);
-                mRotateGestureDetector.onTouchEvent(event);
+                // mScaleGestureDetector.onTouchEvent(event);
+                // mRotateGestureDetector.onTouchEvent(event);
                 mMoveGestureDetector.onTouchEvent(event);
                 return true;
             } else {

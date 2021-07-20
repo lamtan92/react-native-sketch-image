@@ -137,11 +137,13 @@
     return self.id;
 }
 
-- (void)updateEntity:(CGPoint)location rotationInRadians: (CGFloat)rotationInRadians newScale:(CGFloat)newScale  {
+- (void)updateEntity:(CGPoint)location rotationInRadians: (CGFloat)rotationInRadians newScale:(CGFloat)newScale color: (UIColor *)color {
    self.center = location;
    CGAffineTransform t = CGAffineTransformMakeRotation(rotationInRadians);
 
    self.transform = CGAffineTransformScale(t, newScale, newScale);
+
+   self.entityStrokeColor = color;
 }
 
 - (void)updateStrokeSettings: (enum BorderStyle)borderStyle
