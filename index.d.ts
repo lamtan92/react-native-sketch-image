@@ -40,7 +40,7 @@ type CanvasText = {
     lineHeightMultiple?: number;
 };
 
-type Mode = "draw" | "text" | "select";
+type Mode = "draw" | "text" | "select"|'rect';
 
 type Operation = {
     id: string,

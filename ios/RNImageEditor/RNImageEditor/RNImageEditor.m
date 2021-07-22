@@ -926,13 +926,13 @@
     CGFloat rotateInRad = rotate * (M_PI / 180);
 
     if (nextEntity) {
-        if ([self.user isEqualToString: nextEntity.userId]) {
+        // if ([self.user isEqualToString: nextEntity.userId]) {
+            [self onShapeSelectionChanged:nextEntity];
             [self selectEntity:nextEntity];
-        }
+        // }
        
         [self moveEntityX:x Y:y rotation:rotateInRad newScale:scale color:color];
         [self.selectedEntity setNeedsDisplay];
-        [self onShapeSelectionChanged:self.selectedEntity];
         [self onShapeSelectionUpdated:self.selectedEntity];
     } else {
         TextEntity *entity = [[TextEntity alloc]
@@ -962,6 +962,7 @@
         if ([self.user isEqualToString: entity.userId]) {
             [self selectEntity:entity];
         }
+        [self setNeedsDisplay];
     }
 }
 

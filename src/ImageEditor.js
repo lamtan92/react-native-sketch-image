@@ -334,7 +334,7 @@ class ImageEditor extends React.Component {
                     break;
                 case "text":
                     const coorCenter = operation.data.posCenter.split(",").map((pp) => parseFloat(pp).toFixed(2));
-
+                    console.log({ operation });
                     UIManager.dispatchViewManagerCommand(
                         this._handle,
                         UIManager.getViewManagerConfig(RNImageEditor).Commands.addShape,
@@ -358,6 +358,31 @@ class ImageEditor extends React.Component {
                         ]
                     );
                     break;
+                // case "rect":
+                //     UIManager.dispatchViewManagerCommand(
+                //         this._handle,
+                //         UIManager.getViewManagerConfig(RNImageEditor).Commands.addShape,
+                //         [
+                //             "Rect",
+                //             null,
+                //             20,
+                //             "",
+                //             null,
+                //             operation.userId,
+                //             operation.data.id,
+                //             `${
+                //                 (operation.data.start.x * this._screenScale * this._size.width) /
+                //                 operation.data.screensize.width
+                //             },${
+                //                 (operation.data.start.y * this._screenScale * this._size.height) /
+                //                 operation.data.screensize.height
+                //             }`,
+                //             operation.data.scale,
+                //             operation.data.rotate,
+                //             processColor(operation.data.color ? operation.data.color : this.props.strokeColor),
+                //         ]
+                //     );
+                //     break;
                 default:
                     break;
             }
@@ -579,6 +604,9 @@ class ImageEditor extends React.Component {
                             shapeHeight,
                         } = e.nativeEvent;
                         const selectedIndex = this._operations.findIndex((oper) => oper.data.id === shapeId);
+                        console.log({ listOperation: this._operations });
+                        console.log({ shapeId });
+                        console.log({ selectedIndex });
                         if (selectedIndex !== -1) {
                             const xRatio =
                                 this._operations[selectedIndex].data.screensize.width /

@@ -672,6 +672,7 @@ public class ImageEditor extends View {
             if (_entity.userId.equals(mUser)) {
                 selectEntity(_entity);
                 invalidateCanvas(true);
+                onShapeSelectionUpdated();
             }
         } else {
             switch(shapeType) {
